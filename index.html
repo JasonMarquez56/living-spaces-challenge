@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GoggleBox</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<style>
+		:root {
+			--color-bg: #2E083D;
+			--color-nav: #000;
+			--gradient-start: #FF5C00;
+			--gradient-end: #CB2DF4;
+		}
+
+		body {
+			font-family: Arial, sans-serif;
+			background-color: var(--color-bg);
+			margin: 0;
+		}
+
+		nav {
+			background-color: var(--color-nav);
+		}
+
+		.container {
+			max-width: 1620px;
+			margin: 0 auto;
+			padding: 0 20px;
+			box-sizing: border-box;
+		}
+
+		.responsive {
+			width: 100%;
+			border-radius: 6px;
+			display: block;
+		}
+
+		picture .responsive {
+			margin: 60px 0;
+		}
+
+		nav .container {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 5px 20px;
+		}
+
+		nav a {
+			text-decoration: none;
+			color: white;
+			font-weight: 600;
+		}
+		h2, p {
+			color: white;
+		}
+
+		h2 { font-size: clamp(1.3rem, 3vw, 2rem); }
+
+		.np-images {
+			display: flex;
+			gap: 20px;
+			align-items: stretch;
+		}
+
+		.np-main {
+			flex: 1;
+		}
+
+		.np-main .responsive {
+			height: 100%;
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.stacked {
+			flex: 2;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.stacked .responsive {
+			width: 100%;
+		}
+
+		.scroll-container {
+			width: 100%;
+			overflow-x: auto;
+			white-space: nowrap;
+			padding: 10px 0;
+			scroll-behavior: smooth;
+		}
+
+		.scroll-image {
+			height: clamp(150px, 35vh, 350px);
+			width: auto;
+			margin: 0 20px 40px 0;
+			border-radius: 6px;
+		}
+
+		.scroll-container::-webkit-scrollbar {
+			background-color: var(--color-nav);
+			height: 10px;
+			border-radius: 10px;
+		}
+
+		.scroll-container::-webkit-scrollbar-thumb {
+			background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+			border-radius: 10px;
+		}
+
+		footer {
+			padding: 50px 0;
+		}
+
+		footer p {
+			text-align: center;
+		}
+
+		@media (max-width: 580px) {
+			.np-images {
+				flex-direction: column;
+			}
+
+			section.container {
+				padding: 10px 20px;
+			}
+
+			picture .responsive {
+				margin: 10px 0;
+			}
+		}
+
+	</style>
+</head>
+<body>
+	<!-- Navigation Bar -->
+	<nav>
+		<div class="container">
+			<img src="images/gogglebox_logo.png"/>
+			<a href="#sign-in">Sign In</a>
+		</div>
+	</nav>
+	
+	<!-- Hero Image -->
+	<div class="container">
+		<picture>
+			<source media="(max-width: 580px)" srcset="images/2308_mobile_hero.jpg">
+			<img class="responsive" src="images/2308_desktop_hero.jpg">
+		</picture>
+	</div>
+
+	<!-- Now Playing -->
+	<section class="container">
+		<h2>Now Playing</h2>
+		<div class="np-images">
+			<div class="np-main">
+				<img class="responsive" src="images/2308_01_now_playing.jpg"/>
+			</div>
+			<div class="stacked">
+				<img class="responsive" src="images/2308_02_now_playing.jpg"/>
+				<img class="responsive" src="images/2308_03_now_playing.jpg"/>
+			</div>
+		</div>
+	</section>
+
+	<!-- Tomorrow's Schedule -->
+	<section class="container">
+		<h2>Tomorrow's Schedule</h2>
+		<div id="tomorrow-schedule" class="scroll-container"></div>
+	</section>
+	
+	<!-- Footer -->
+	<footer>
+		<p>© GoggleBox 2026 All Rights Reserved</p>
+	</footer>
+
+<script>
+	/* Get the date */
+	const today = new Date();
+	const tomorrow = new Date(today);
+	tomorrow.setDate(today.getDate() + 1);
+	const date = tomorrow.toISOString().split('T')[0];
+
+	/* Call TVmaze */
+	$.ajax({
+		url: `https://api.tvmaze.com/schedule?country=US&date=${date}`,
+		method: "GET",
+		success: function(data) {
+			data.slice(0, 24).forEach(function(show) {
+				if(show.show.image) {
+					const img = $('<img>').addClass('scroll-image')
+						.attr('src', show.show.image.medium)
+						.attr('alt', show.show.name);
+					$('#tomorrow-schedule').append(img);
+				}
+			});
+		},
+		error: function() {
+			$('#tomorrow-schedule').append(`<p style="color: white;">Unable to load tomorrow's schedule. Please try again later.</p>
+`);
+		}
+	});
+</script>
+</body>
+</html>
